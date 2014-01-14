@@ -1,0 +1,63 @@
+{
+  "sources": {
+    "dokku-deployment-keys": {
+      "path": "."
+    },
+    "golang": {
+      "locked_version": "1.0.2",
+      "git": "git://github.com/buth/chef-golang.git",
+      "ref": "d1d3778a68786749f03fd368c5a6b428619534e7"
+    },
+    "lxc": {
+      "locked_version": "1.1.8",
+      "git": "git://github.com/hw-cookbooks/lxc.git",
+      "ref": "16392c90dab7b539dceeb30b0233d8fca2bbe895"
+    },
+    "modules": {
+      "locked_version": "0.2.0",
+      "git": "git://github.com/Youscribe/modules-cookbook.git",
+      "ref": "f5523ae007e66da4090968f58dcc2e582dda9cf8"
+    },
+    "docker": {
+      "locked_version": "0.25.1",
+      "git": "git://github.com/bflad/chef-docker.git",
+      "ref": "5ea88c3caeaac5899e3227b4d59aba4a3a517d3d"
+    },
+    "dokku": {
+      "path": "./cookbooks/dokku"
+    },
+    "git": {
+      "locked_version": "2.9.0"
+    },
+    "dmg": {
+      "locked_version": "2.1.2"
+    },
+    "build-essential": {
+      "locked_version": "1.4.2"
+    },
+    "windows": {
+      "locked_version": "1.12.6"
+    },
+    "chef_handler": {
+      "locked_version": "1.1.4"
+    },
+    "runit": {
+      "locked_version": "1.5.8"
+    },
+    "yum": {
+      "locked_version": "3.0.4"
+    },
+    "yum-epel": {
+      "locked_version": "0.2.0"
+    },
+    "dpkg_autostart": {
+      "locked_version": "0.1.10"
+    },
+    "apt": {
+      "locked_version": "2.3.4"
+    },
+    "sysctl": {
+      "locked_version": "0.3.5"
+    }
+  }
+}
