@@ -1,0 +1,78 @@
+#!/bin/bash
+#set -e;
+
+APP=$2
+
+APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
+SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
+
+check_exists() {
+  if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
+    echo "App must exist before you can operate on private deployment keys for it"
+    exit 1
+  fi
+}
+
+check_app() {
+  if [[ -z "$APP" ]]; then
+    echo "You must specify an app name"
+    exit 1
+  fi
+}
+
+check_app_has_keys() {
+  if [[ -f "$APP_SPECIFIC_KEY_FOLDER/.ssh/id_rsa.pub" ]]; then
+    echo "This app already has a pair of keys. Delete them first to create new ones";
+    exit 1
+  fi
+}
+
+case "$1" in
+  deploymentkeys:create)
+    check_app
+    check_exists
+    check_app_has_keys
+    ssh-keygen -q -t rsa -b 2048 -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" -N ""
+    echo "Keys created, here is the public key for $APP:"
+    cat "$APP_SPECIFIC_KEY_FOLDER/id_rsa.pub";
+    echo "They will be baked into the container on next push/rebuild"
+    ;;
+  deploymentkeys:delete)
+    check_app
+    check_exists
+    rm -Rf $APP_SPECIFIC_KEY_FOLDER
+    ;;
+  deploymentkeys:shared)
+    echo "This is the current shared public key:"
+    cat "$SHARED_KEY_FOLDER/id_rsa.pub";
+    ;;
+  deploymentkeys:show)
+    check_app
+    check_exists
+    if [[ -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa.pub" ]]
+     then
+      echo "Private keys created, here is the public key for $APP:"
+      cat "$APP_SPECIFIC_KEY_FOLDER/id_rsa.pub";
+     else
+      echo "No private key for $APP. This is the shared public key:"
+      cat "$SHARED_KEY_FOLDER/id_rsa.pub"
+    fi
+    ;;
+  deploymentkeys:status)
+    check_app
+    check_exists
+    if [[ -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa.pub" ]]; then
+      echo "This app uses a private set of deployment keys."
+    else
+      echo "This app uses the shared set of deployment keys."
+    fi
+    ;;
+  help)
+    cat && cat<<EOF
+    deploymentkeys:create <app> Create a pair of app-specific deployment keys
+    deploymentkeys:delete <app> Delete the current pair of deployment keys
+    deploymentkeys:shared       Shows the current shared public key
+    deploymentkeys:show   <app> Shows the current public key to add to your VCS
+EOF
+    ;;
+esac
