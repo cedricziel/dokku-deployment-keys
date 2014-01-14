@@ -29,6 +29,6 @@ test $(docker wait $idWithKeys) -eq 0
 docker commit $idWithKeys $IMAGE > /dev/null
 
 # 3. Transfer the app specific public key to the container
-idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> $HOME/.ssh/id_rsa.pub && chmod 600 $HOME/.ssh/id_rsa.pub")
+idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> $HOME/.ssh/id_rsa.pub && chmod 600 $HOME/.ssh/id_rsa && chmod 600 $HOME/.ssh/id_rsa.pub")
 test $(docker wait $idWithPublicKeys) -eq 0
 docker commit $idWithPublicKeys $IMAGE > /dev/null
