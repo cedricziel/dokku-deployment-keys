@@ -9,7 +9,7 @@ echo -e "SSH-Keys Plugin:\n"
 if [[ ! -d "$shared_key_folder/.ssh" ]]; then
   echo -e "No shared SSH key folder found. Will create one now.\n"
   mkdir -p "$shared_key_folder/.ssh"
-  #chown dokku:dokku "$DOKKU_ROOT/.deployment-keys/.ssh"
+  chown dokku:dokku "$shared_key_folder/.ssh"
   chmod 700 "$shared_key_folder/.ssh"
 fi
 
