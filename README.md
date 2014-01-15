@@ -1,9 +1,11 @@
 SSH Deployment Keys Plugin for Dokku
 ====================================
 
-Provides a Dokku Plugin for injecting SSH deployment keys as well as injecting hostkeys to the container.
+Provides a Dokku Plugin for injecting SSH deployment keys to the container.
 
 This is useful if you hide your sourcecode in private repositories at VCS providers such as GitHub or Bitbucket.
+
+If you need hostkeys being added to it, checkout [dokku-hostkeys-plugin](http://github.com/cedricziel/dokku-hostkeys-plugin)
 
 Installation
 ------------
