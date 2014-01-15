@@ -3,7 +3,6 @@ set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 APP="$1"; IMAGE="app/$APP"
 APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
 SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
-KEY_PATH="/home/dokku/.ssh"
 SOURCE_ENV_PATH="$HOME/$APP/ENV"
 
 
@@ -18,16 +17,16 @@ fi
 echo "-----> Installing $KEYTYPE SSH keys in build environment ..."
 
 # 1. Create the .ssh folder
-id=$(docker run -i -a stdin $IMAGE /bin/bash -c "mkdir -m 700 $HOME/.ssh")
+id=$(docker run -i -a stdin $IMAGE /bin/bash -c "mkdir -m 700 /.ssh")
 test $(docker wait $id) -eq 0
 docker commit $id $IMAGE > /dev/null
 
 # 2. Transfer the app specific private key to the container
-idWithKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> $HOME/.ssh/id_rsa && chmod 600 $HOME/.ssh/id_rsa")
+idWithKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /.ssh/id_rsa && chmod 600 /.ssh/id_rsa")
 test $(docker wait $idWithKeys) -eq 0
 docker commit $idWithKeys $IMAGE > /dev/null
 
 # 3. Transfer the app specific public key to the container
-idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> $HOME/.ssh/id_rsa.pub && chmod 600 $HOME/.ssh/id_rsa && chmod 600 $HOME/.ssh/id_rsa.pub")
+idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /.ssh/id_rsa.pub && chmod 600 /.ssh/id_rsa && chmod 600 /.ssh/id_rsa.pub")
 test $(docker wait $idWithPublicKeys) -eq 0
 docker commit $idWithPublicKeys $IMAGE > /dev/null

@@ -1,5 +1,5 @@
-#!/bin/bash
-#set -e;
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
 APP=$2
 
@@ -21,18 +21,26 @@ check_app() {
 }
 
 check_app_has_keys() {
-  if [[ -f "$APP_SPECIFIC_KEY_FOLDER/.ssh/id_rsa.pub" ]]; then
+  if [[ -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa.pub" ]]; then
     echo "This app already has a pair of keys. Delete them first to create new ones";
     exit 1
   fi
 }
 
+create_private_key_folder() {
+  if [[ ! -d "$APP_SPECIFIC_KEY_FOLDER" ]]; then
+    mkdir -p "$APP_SPECIFIC_KEY_FOLDER"
+    chown -R dokku:dokku "$DOKKU_ROOT/.deployment-keys/$APP"
+  fi
+}
 case "$1" in
   deploymentkeys:create)
     check_app
     check_exists
     check_app_has_keys
+    create_private_key_folder
     ssh-keygen -q -t rsa -b 2048 -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" -N ""
+    chown -R dokku:dokku "$DOKKU_ROOT/.deployment-keys"
     echo "Keys created, here is the public key for $APP:"
     cat "$APP_SPECIFIC_KEY_FOLDER/id_rsa.pub";
     echo "They will be baked into the container on next push/rebuild"
@@ -40,7 +48,8 @@ case "$1" in
   deploymentkeys:delete)
     check_app
     check_exists
-    rm -Rf $APP_SPECIFIC_KEY_FOLDER
+    rm -Rf "$APP_SPECIFIC_KEY_FOLDER/id_rsa*"
+    echo "Removed deployment keys for $APP"
     ;;
   deploymentkeys:shared)
     echo "This is the current shared public key:"
@@ -69,10 +78,10 @@ case "$1" in
     ;;
   help)
     cat && cat<<EOF
-    deploymentkeys:create <app> Create a pair of app-specific deployment keys
-    deploymentkeys:delete <app> Delete the current pair of deployment keys
-    deploymentkeys:shared       Shows the current shared public key
-    deploymentkeys:show   <app> Shows the current public key to add to your VCS
+    deploymentkeys:create <app>                     Create a pair of app-specific deployment keys
+    deploymentkeys:delete <app>                     Delete the current pair of deployment keys
+    deploymentkeys:shared                           Shows the current shared public key
+    deploymentkeys:show   <app>                     Shows the current public key to add to your VCS
 EOF
     ;;
 esac
