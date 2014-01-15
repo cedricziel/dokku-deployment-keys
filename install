@@ -1,32 +1,15 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-ssh_keygen=`which ssh-keygen`
-shared_key_folder="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
+SSH_KEYGEN=`which ssh-keygen`
+SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
 
-echo -e "SSH-Keys Plugin:\n"
-
-if [[ ! -d "$shared_key_folder/.ssh" ]]; then
-  echo -e "No shared SSH key folder found. Will create one now.\n"
-  mkdir -p "$shared_key_folder/.ssh"
-  chown dokku:dokku "$shared_key_folder/.ssh"
-  chmod 700 "$shared_key_folder/.ssh"
+if [[ ! -d "$SHARED_KEY_FOLDER/.ssh" ]]; then
+  mkdir -p "$SHARED_KEY_FOLDER/.ssh"
+  chown dokku:dokku "$SHARED_KEY_FOLDER/.ssh"
+  chmod 700 "$SHARED_KEY_FOLDER/.ssh"
 fi
 
-if [[ ! -f "$shared_key_folder/id_rsa" ]]
-then
-	ssh-keygen -q -t rsa -b 2048 -f "$shared_key_folder/id_rsa" -N ""
-	echo "The key generated has the following public key:"
-	cat "$shared_key_folder/id_rsa.pub";
-	echo -e "\n"
-	echo "You may want to add this as a deployment key to your VCS provider"
-	echo "Be warned, this is a shared key for all apps that do not have their own keys."
-else
-	echo "A set of shared SSH keys is already present."
-	echo "If you want to generate a new pair, delete the old pair manually."
-	echo "The existing keypair has the following public key:";
-	cat "$shared_key_folder/id_rsa.pub";
-	echo -e "\n"
-	echo "You may want to add this as a deployment key to your VCS provider"
-	echo "Be warned, this is a shared key for all apps that do not have their own keys."
+if [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
+	ssh-keygen -q -t rsa -b 2048 -f "$SHARED_KEY_FOLDER/id_rsa" -N ""
 fi

@@ -7,13 +7,12 @@ KEY_PATH="/home/dokku/.ssh"
 SOURCE_ENV_PATH="$HOME/$APP/ENV"
 
 
-if [[ -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" ]]
-  then
-    FINAL_SSH_FOLDER = "$APP_SPECIFIC_KEY_FOLDER"
-    KEYTYPE = "app specific"
+if [[ -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" ]]; then
+    FINAL_SSH_FOLDER="$APP_SPECIFIC_KEY_FOLDER"
+    KEYTYPE="app specific"
   else
-    FINAL_SSH_FOLDER = "$SHARED_KEY_FOLDER"
-    KEYTYPE = "shared"
+    FINAL_SSH_FOLDER="$SHARED_KEY_FOLDER"
+    KEYTYPE="shared"
 fi
 
 echo "-----> Installing $KEYTYPE SSH keys in build environment ..."
