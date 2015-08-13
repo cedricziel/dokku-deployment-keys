@@ -84,4 +84,7 @@ case "$1" in
     deploymentkeys:show   <app>                     Shows the current public key to add to your VCS
 EOF
     ;;
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
 esac
