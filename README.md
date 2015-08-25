@@ -32,7 +32,7 @@ FAQ
 
 **Q:** Can I replace it with an existing keypair?
 
-**A:** Of course. But its a matter of lazyness. Every user-host combination should have its own keys so they can be revoked easily. Place existing ones in `$DOKKU_ROOT/.deployment-keys/shared/.ssh. Be careful with the permissions. `chmod 600` is mandatory for some ssh-executables and this is for a good reason!
+**A:** Of course. But its a matter of lazyness. Every user-host combination should have its own keys so they can be revoked easily. Place existing ones in `$DOKKU_ROOT/.deployment-keys/shared/.ssh.` Be careful with the permissions. `chmod 600` is mandatory for some ssh-executables and this is for a good reason!
 
 License
 -------
