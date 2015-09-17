@@ -78,10 +78,10 @@ case "$1" in
     ;;
   help)
     cat && cat<<EOF
-    deploymentkeys:create <app>                     Create a pair of app-specific deployment keys
-    deploymentkeys:delete <app>                     Delete the current pair of deployment keys
-    deploymentkeys:shared                           Shows the current shared public key
-    deploymentkeys:show   <app>                     Shows the current public key to add to your VCS
+    deploymentkeys:create <app>, Create a pair of app-specific deployment keys
+    deploymentkeys:delete <app>, Delete the current pair of deployment keys
+    deploymentkeys:shared, Shows the current shared public key
+    deploymentkeys:show   <app>, Shows the current public key to add to your VCS
 EOF
     ;;
   *)
