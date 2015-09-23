@@ -33,6 +33,17 @@ create_private_key_folder() {
     chown -R dokku:dokku "$DOKKU_ROOT/.deployment-keys/$APP"
   fi
 }
+
+print_help(){
+  cat<<EOF
+  deploymentkeys:create <app>, Create a pair of app-specific deployment keys
+  deploymentkeys:delete <app>, Delete the current pair of deployment keys
+  deploymentkeys:shared, Shows the current shared public key
+  deploymentkeys:show   <app>, Shows the current public key to add to your VCS
+EOF
+  return
+}
+
 case "$1" in
   deploymentkeys:create)
     check_app
@@ -77,12 +88,11 @@ case "$1" in
     fi
     ;;
   help)
-    cat && cat<<EOF
-    deploymentkeys:create <app>, Create a pair of app-specific deployment keys
-    deploymentkeys:delete <app>, Delete the current pair of deployment keys
-    deploymentkeys:shared, Shows the current shared public key
-    deploymentkeys:show   <app>, Shows the current public key to add to your VCS
-EOF
+    if [[ -n $DOKKU_API_VERSION ]]; then
+      print_help
+    else
+      cat && print_help
+    fi
     ;;
   *)
     exit $DOKKU_NOT_IMPLEMENTED_EXIT

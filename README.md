@@ -11,8 +11,12 @@ Installation
 ------------
 
 ```
+# dokku 0.3.x
 git clone https://github.com/cedricziel/dokku-deployment-keys.git /var/lib/dokku/plugins/deployment-keys
 dokku plugins-install
+
+# dokku 0.4+
+dokku plugin:install https://github.com/cedricziel/dokku-deployment-keys.git
 ```
 
 How does it work?
