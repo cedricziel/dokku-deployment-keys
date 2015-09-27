@@ -1,0 +1,4 @@
+[plugin]
+description = "allows for injecting SSH deployment keys to the container"
+version = "1.0.0"
+[plugin.config]
