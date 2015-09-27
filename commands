@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-APP=$2
-
+APP="$2"
 APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
 SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
 
@@ -56,16 +55,19 @@ case "$1" in
     cat "$APP_SPECIFIC_KEY_FOLDER/id_rsa.pub";
     echo "They will be baked into the container on next push/rebuild"
     ;;
+
   deploymentkeys:delete)
     check_app
     check_exists
     rm -Rf "$APP_SPECIFIC_KEY_FOLDER/id_rsa*"
     echo "Removed deployment keys for $APP"
     ;;
+
   deploymentkeys:shared)
     echo "This is the current shared public key:"
     cat "$SHARED_KEY_FOLDER/id_rsa.pub";
     ;;
+
   deploymentkeys:show)
     check_app
     check_exists
@@ -78,6 +80,7 @@ case "$1" in
       cat "$SHARED_KEY_FOLDER/id_rsa.pub"
     fi
     ;;
+
   deploymentkeys:status)
     check_app
     check_exists
@@ -87,14 +90,17 @@ case "$1" in
       echo "This app uses the shared set of deployment keys."
     fi
     ;;
-  help)
+
+  help | deploymentkeys:help)
     if [[ -n $DOKKU_API_VERSION ]]; then
       print_help
     else
       cat && print_help
     fi
     ;;
+
   *)
-    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    exit "$DOKKU_NOT_IMPLEMENTED_EXIT"
     ;;
+
 esac

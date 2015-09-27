@@ -1,6 +1,4 @@
 [plugin]
-name = "dokku-deployment-keys"
-description = "Provides a Dokku Plugin for injecting SSH deployment keys to the container"
+description = "Manage SSH deployment keys that should get injected into your containers on-build"
 version = "0.1.0"
-website_url = "https://github.com/expa/dokku-deployment-keys"
 [plugin.config]
