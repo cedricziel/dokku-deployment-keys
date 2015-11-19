@@ -1,2 +1,4 @@
 [plugin]
-description = "plugin for injecting hostkeys to the container"
+description = "Manage SSH deployment keys that should get injected into your containers on-build"
+version = "0.1.0"
+[plugin.config]

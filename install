@@ -1,17 +1,14 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-SSH_KEYGEN=`which ssh-keygen`
 SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
 
-if [[ ! -d "$SHARED_KEY_FOLDER" ]]
- then
-  mkdir -p "$SHARED_KEY_FOLDER";
+if [[ ! -d "$SHARED_KEY_FOLDER" ]]; then
+  mkdir -p "$SHARED_KEY_FOLDER"
 fi
 
-if [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]]
- then
-	ssh-keygen -q -t rsa -b 2048 -f "$SHARED_KEY_FOLDER/id_rsa" -N "";
+if [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
+	ssh-keygen -q -t rsa -b 2048 -f "$SHARED_KEY_FOLDER/id_rsa" -N ""
 fi
 
 chmod 700 "$SHARED_KEY_FOLDER"
