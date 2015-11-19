@@ -1,0 +1,2 @@
+[plugin]
+description = "plugin for injecting hostkeys to the container"
