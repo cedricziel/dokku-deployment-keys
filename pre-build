@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+<<<<<<< HEAD
 APP="$1"; IMAGE="dokku/$APP"
 
 if [[ -n $DOKKU_API_VERSION ]]; then
@@ -26,23 +27,27 @@ fi
 echo "-----> Installing $KEYTYPE SSH keys in build environment ..."
 
 # 1. Create the .ssh folder
+<<<<<<< HEAD
 id=$(docker run -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
+=======
+id=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
+>>>>>>> Fix build with dokku >= 0.4.x
 test $(docker wait $id) -eq 0
 docker commit $id $IMAGE > /dev/null
 
 # 2. Transfer the app specific private key to the container
 # shellcheck disable=SC2002
-idWithKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa && chmod 600 /app/.ssh/id_rsa")
+idWithKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa && chmod 600 /app/.ssh/id_rsa")
 test $(docker wait $idWithKeys) -eq 0
 docker commit $idWithKeys $IMAGE > /dev/null
 
 # 3. Transfer the app specific public key to the container
 # shellcheck disable=SC2002
-idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa.pub && chmod 600 /app/.ssh/id_rsa && chmod 644 /app/.ssh/id_rsa.pub && chown -R 1001:1001 /app/.ssh")
+idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa.pub && chmod 600 /app/.ssh/id_rsa && chmod 644 /app/.ssh/id_rsa.pub && chown -R 1001:1001 /app/.ssh")
 test $(docker wait $idWithPublicKeys) -eq 0
 docker commit $idWithPublicKeys $IMAGE > /dev/null
 
 # 4. Add identity file option to global SSH config
-idWithConfig=$(echo "IdentityFile /app/.ssh/id_rsa" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
+idWithConfig=$(echo "IdentityFile /app/.ssh/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
 test $(docker wait $idWithConfig) -eq 0
 docker commit $idWithConfig $IMAGE > /dev/null
