@@ -48,7 +48,7 @@ case "$1" in
   deploymentkeys:delete)
     check_app
     check_exists
-    rm -Rf "$APP_SPECIFIC_KEY_FOLDER/id_rsa*"
+    rm -Rf "$APP_SPECIFIC_KEY_FOLDER"/id_rsa*
     echo "Removed deployment keys for $APP"
     ;;
 
