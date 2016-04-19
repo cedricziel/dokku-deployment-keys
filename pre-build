@@ -27,7 +27,7 @@ fi
 echo "-----> Installing $KEYTYPE SSH keys in build environment ..."
 
 # 1. Create the .ssh folder
-id=$(docker run -i -a stdin $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
+id=$(docker run -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
 test $(docker wait $id) -eq 0
 docker commit $id $IMAGE > /dev/null
 
