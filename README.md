@@ -8,6 +8,7 @@ This is useful if you hide your sourcecode in private repositories at VCS provid
 
 - dokku 0.4.0+
 - docker 1.8.x
+- [host-keys plugin](https://github.com/cedricziel/dokku-hostkeys-plugin)
 
 
 Optionally, if you need host keys to be added, install the [host-keys plugin](https://github.com/cedricziel/dokku-hostkeys-plugin) as well.
