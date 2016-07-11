@@ -10,6 +10,7 @@ If you need hostkeys being added to it, checkout [dokku-hostkeys-plugin](https:/
 
 - dokku 0.4.0+
 - docker 1.8.x
+- [host-keys plugin](https://github.com/cedricziel/dokku-hostkeys-plugin)
 
 ## installation
 
