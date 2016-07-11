@@ -4,12 +4,13 @@ Provides a Dokku Plugin for injecting SSH deployment keys to the container.
 
 This is useful if you hide your sourcecode in private repositories at VCS providers such as GitHub or Bitbucket.
 
-If you need hostkeys being added to it, checkout [dokku-hostkeys-plugin](https://github.com/cedricziel/dokku-hostkeys-plugin)
-
 ## requirements
 
 - dokku 0.4.0+
 - docker 1.8.x
+
+
+Optionally, if you need host keys to be added, install the [host-keys plugin](https://github.com/cedricziel/dokku-hostkeys-plugin) as well.
 
 ## installation
 
