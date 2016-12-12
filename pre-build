@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
-<<<<<<< HEAD
-APP="$1"; IMAGE="dokku/$APP"
+APP="$1";
+
+[[ $(declare -f -F check_app_name) ]] && check_app_name "$APP" || IMAGE="dokku/$APP"
 
 if [[ -n $DOKKU_API_VERSION ]]; then
   source "$PLUGIN_ENABLED_PATH/common/functions"
@@ -27,11 +28,7 @@ fi
 echo "-----> Installing $KEYTYPE SSH keys in build environment ..."
 
 # 1. Create the .ssh folder
-<<<<<<< HEAD
-id=$(docker run -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
-=======
 id=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
->>>>>>> Fix build with dokku >= 0.4.x
 test $(docker wait $id) -eq 0
 docker commit $id $IMAGE > /dev/null
 
