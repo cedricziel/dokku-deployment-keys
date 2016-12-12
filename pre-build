@@ -2,6 +2,10 @@
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 APP="$1";
 
+if ([[ -f "$(dirname $0)/../dokku_common" ]]); then
+  source "$(dirname $0)/../dokku_common"
+fi
+
 [[ $(declare -f -F check_app_name) ]] && check_app_name "$APP" || IMAGE="dokku/$APP"
 
 if [[ -n $DOKKU_API_VERSION ]]; then

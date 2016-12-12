@@ -12,9 +12,6 @@ This is useful if you hide your sourcecode in private repositories at VCS provid
 
 Optionally, if you need host keys to be added, install the [host-keys plugin](https://github.com/cedricziel/dokku-hostkeys-plugin) as well.
 
-
-Optionally, if you need host keys to be added, install the [host-keys plugin](https://github.com/cedricziel/dokku-hostkeys-plugin) as well.
-
 ## installation
 
 ```shell
