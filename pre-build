@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
-APP="$1"; IMAGE="dokku/$APP"
+APP="$1";
+
+[[ $(declare -f -F check_app_name) ]] && check_app_name "$APP" || IMAGE="dokku/$APP"
 
 if [[ -n $DOKKU_API_VERSION ]]; then
   source "$PLUGIN_ENABLED_PATH/common/functions"
@@ -9,39 +11,40 @@ fi
 
 APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
 SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
-SOURCE_ENV_PATH="$HOME/$APP/ENV"
 
 echo "-----> Checking deploymentkeys Plugin sanity ..."
 bash $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/install
 
 if [[ -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" ]]; then
-    FINAL_SSH_FOLDER="$APP_SPECIFIC_KEY_FOLDER"
-    KEYTYPE="app specific"
-  else
-    if [[ -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
-      FINAL_SSH_FOLDER="$SHARED_KEY_FOLDER"
-      KEYTYPE="shared"
-    fi
+  FINAL_SSH_FOLDER="$APP_SPECIFIC_KEY_FOLDER"
+  KEYTYPE="app specific"
+else
+  if [[ -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
+    FINAL_SSH_FOLDER="$SHARED_KEY_FOLDER"
+    KEYTYPE="shared"
+  fi
 fi
 
 echo "-----> Installing $KEYTYPE SSH keys in build environment ..."
 
 # 1. Create the .ssh folder
-id=$(docker run -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
+id=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
 test $(docker wait $id) -eq 0
 docker commit $id $IMAGE > /dev/null
 
 # 2. Transfer the app specific private key to the container
-idWithKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa && chmod 600 /app/.ssh/id_rsa")
+# shellcheck disable=SC2002
+idWithKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa && chmod 600 /app/.ssh/id_rsa")
 test $(docker wait $idWithKeys) -eq 0
 docker commit $idWithKeys $IMAGE > /dev/null
 
 # 3. Transfer the app specific public key to the container
-idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa.pub && chmod 600 /app/.ssh/id_rsa && chmod 644 /app/.ssh/id_rsa.pub && chown -R 1001:1001 /app/.ssh")
+# shellcheck disable=SC2002
+idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa.pub && chmod 600 /app/.ssh/id_rsa && chmod 644 /app/.ssh/id_rsa.pub && chown -R 1001:1001 /app/.ssh")
 test $(docker wait $idWithPublicKeys) -eq 0
 docker commit $idWithPublicKeys $IMAGE > /dev/null
 
 # 4. Add identity file option to global SSH config
-idWithConfig=$(echo "IdentityFile /app/.ssh/id_rsa" | docker run -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
+idWithConfig=$(echo "IdentityFile /app/.ssh/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
 test $(docker wait $idWithConfig) -eq 0
 docker commit $idWithConfig $IMAGE > /dev/null
