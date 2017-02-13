@@ -49,6 +49,6 @@ test $(docker wait $idWithPublicKeys) -eq 0
 docker commit $idWithPublicKeys $IMAGE > /dev/null
 
 # 4. Add identity file option to global SSH config
-idWithConfig=$(echo "IdentityFile /app/.ssh/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
+idWithConfig=$(echo -e "IdentityFile /app/.ssh/id_rsa\nStrictHostKeyChecking no" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
 test $(docker wait $idWithConfig) -eq 0
 docker commit $idWithConfig $IMAGE > /dev/null
