@@ -20,7 +20,7 @@ else
   fi
 fi
 
-dokku_log_info1 "Adding $KEYTYPE ssh keys to build environment ..."
+dokku_log_info1 "Adding $KEYTYPE deployment-keys to build environment ..."
 
 # 1. Create the .ssh folder
 id=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
