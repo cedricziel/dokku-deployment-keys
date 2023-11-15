@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_ENABLED_PATH/common/functions"
-APP="$1";
+BUILDER_TYPE="$1" APP="$2"
+if [[ "$BUILDER_TYPE" != "herokuish" ]] then
+  exit 0
+fi
 IMAGE=$(get_app_image_name $APP)
 
 APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
