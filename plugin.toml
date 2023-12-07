@@ -1,5 +1,5 @@
 [plugin]
 name = "dokku-deployment-keys"
 description = "Manage SSH deployment keys that should get injected into your containers on-build"
-version = "0.2.0"
+version = "0.3.0"
 [plugin.config]
