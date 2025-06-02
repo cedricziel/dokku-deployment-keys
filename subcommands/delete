@@ -9,8 +9,8 @@ delete-cmd() {
   #E delete the current pair of deployment keys
   #E dokku $PLUGIN_COMMAND_PREFIX:delete my-app
   #A app, app to run command against
-  declare desc="create deployment keys for an app"
-  local cmd="$PLUGIN_COMMAND_PREFIX:create" argv=("$@")
+  declare desc="delete the current pair of deployment keys"
+  local cmd="$PLUGIN_COMMAND_PREFIX:delete" argv=("$@")
   [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare APP="$1"
   APP=${APP:="$DOKKU_APP_NAME"}

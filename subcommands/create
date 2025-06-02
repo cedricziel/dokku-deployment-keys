@@ -9,7 +9,7 @@ create-cmd() {
   #E create a pair of app-specific deployment keys
   #E dokku $PLUGIN_COMMAND_PREFIX:create my-app
   #A app, app to run command against
-  declare desc="create deployment keys for an app"
+  declare desc="create a pair of app-specific deployment keys"
   local cmd="$PLUGIN_COMMAND_PREFIX:create" argv=("$@")
   [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare APP="$1"
