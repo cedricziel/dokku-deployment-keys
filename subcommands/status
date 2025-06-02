@@ -20,9 +20,9 @@ status-cmd() {
 
   local app_specific_key_folder="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
   if [[ -f "$app_specific_key_folder/id_rsa.pub" ]]; then
-    echo "This app uses a private set of deployment keys."
+    dokku_log_info1 "This app uses a private set of deployment keys."
   else
-    echo "This app uses the shared set of deployment keys."
+    dokku_log_info1 "This app uses the shared set of deployment keys."
   fi
 }
 

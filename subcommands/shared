@@ -18,7 +18,7 @@ shared-cmd() {
   [[ -z "$APP" ]] && dokku_log_fail "Please specify an app to run the command on"
   verify_app_name "$APP"
 
-  echo "This is the current shared public key:"
+  dokku_log_info1_quiet "This is the current shared public key:"
   local shared_key_folder="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
   cat "$shared_key_folder/id_rsa.pub"
 }

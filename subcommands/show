@@ -20,10 +20,10 @@ show-cmd() {
 
   local app_specific_key_folder="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
   if [[ -f "$app_specific_key_folder/id_rsa.pub" ]]; then
-    echo "Private keys created, here is the public key for $APP:"
+    dokku_log_info1_quiet "Private keys created, here is the public key for $APP:"
     cat "$app_specific_key_folder/id_rsa.pub"
   else
-    echo "No private key for $APP. This is the shared public key:"
+    dokku_log_info1_quiet "No private key for $APP. This is the shared public key:"
     local shared_key_folder="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
     cat "$shared_key_folder/id_rsa.pub"
   fi

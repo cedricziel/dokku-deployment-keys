@@ -20,7 +20,7 @@ delete-cmd() {
 
   local app_specific_key_folder="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
   rm -Rf "$app_specific_key_folder"/id_rsa*
-  echo "Removed deployment keys for $APP"
+  dokku_log_info1_quiet "Removed deployment keys for $APP"
 }
 
 delete-cmd "$@"
