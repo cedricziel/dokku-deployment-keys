@@ -7,7 +7,7 @@ source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
 
 shared-cmd() {
   #E shows the current shared public key
-  #E dokku $PLUGIN_COMMAND_PREFIX:show my-app
+  #E dokku $PLUGIN_COMMAND_PREFIX:shared my-app
   #A app, app to run command against
   declare desc="shows the current shared public key"
   local cmd="$PLUGIN_COMMAND_PREFIX:shared" argv=("$@")

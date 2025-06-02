@@ -70,7 +70,7 @@ dokku deployment-keys:shared <app>
 Shows the current shared public key:
 
 ```shell
-dokku deployment-keys:show my-app
+dokku deployment-keys:shared my-app
 ```
 
 ### shows the current public key to add to your VCS
