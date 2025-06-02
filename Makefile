@@ -34,7 +34,7 @@ endif
 
 shfmt:
 ifneq ($(shell shfmt --version >/dev/null 2>&1 ; echo $$?),0)
-ifeq ($(shfmt),Darwin)
+ifeq ($(SYSTEM_NAME),darwin)
 	brew install shfmt
 else
 	wget -qO /tmp/shfmt https://github.com/mvdan/sh/releases/download/v$(SHFMT_VERSION)/shfmt_v$(SHFMT_VERSION)_linux_amd64
@@ -44,7 +44,7 @@ endif
 endif
 
 readlink:
-ifeq ($(shell uname),Darwin)
+ifeq ($(SYSTEM_NAME),darwin)
 ifeq ($(shell greadlink > /dev/null 2>&1 ; echo $$?),127)
 	brew install coreutils
 endif
