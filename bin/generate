@@ -8,12 +8,10 @@ import re
 
 def compile(
     service,
-    version,
     variable,
     alias,
-    image,
-    scheme,
-    ports,
+    description,
+    maintainer,
     sponsors,
     options,
     unimplemented,
@@ -21,10 +19,16 @@ def compile(
 ):
     prefix = "\n\n".join(
         [
-            header(service),
-            description(service, image, version),
+            header(service, maintainer),
+            description,
         ]
     )
+
+    doc_file = os.path.join("docs", "header.md")
+    if os.path.isfile(doc_file):
+        with open(doc_file) as f:
+            prefix += "\n\n"
+            prefix += f.read()
 
     if len(sponsors) > 0:
         prefix += "\n\n"
@@ -35,20 +39,16 @@ def compile(
             [
                 prefix,
                 requirements_section(dokku_version),
-                installation_section(service, dokku_version),
-                commands_section(
-                    service, variable, alias, image, scheme, ports, unimplemented
-                ),
+                installation_section(service, dokku_version, maintainer),
+                commands_section(service, variable, alias, unimplemented),
                 usage_section(
                     service,
                     variable,
                     alias,
-                    image,
-                    scheme,
-                    ports,
                     options,
                     unimplemented,
                 ),
+                errata_section(),
             ]
         )
         .replace("\n\n\n\n\n", "\n")
@@ -57,24 +57,14 @@ def compile(
     )
 
 
-def header(service):
+def header(service, maintainer):
     return " ".join(
         [
             f"# dokku {service}",
-            f'[![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-{service}/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-{service}/actions/workflows/ci.yml?query=branch%3Amaster)',
+            f'[![Build Status](https://img.shields.io/github/actions/workflow/status/{maintainer}/dokku-{service}/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/{maintainer}/dokku-{service}/actions/workflows/ci.yml?query=branch%3Amaster)',
             f'[![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)',
         ]
     )
-
-
-def description(service, full_image, version):
-    base = "_"
-    image = full_image
-    if "/" in full_image:
-        base = "r/" + full_image.split("/")[0]
-        image = full_image.split("/")[1]
-
-    return f"Official {service} plugin for dokku. Currently defaults to installing [{full_image} {version}](https://hub.docker.com/{base}/{image}/)."
 
 
 def sponsors_section(service, sponsors):
@@ -93,30 +83,36 @@ def sponsors_section(service, sponsors):
 
 
 def requirements_section(dokku_version):
-    return "\n".join(
-        [
-            "## Requirements",
-            "",
-            f"- dokku {dokku_version}",
-            "- docker 1.8.x",
-        ]
-    )
+    content = [
+        "## Requirements",
+        "",
+        f"- dokku {dokku_version}",
+        "- docker 1.8.x",
+    ]
+
+    doc_file = os.path.join("docs", "requirements.md")
+    if os.path.isfile(doc_file):
+        content.append("")
+        with open(doc_file) as f:
+            content.append(f.read())
+
+    return "\n".join(content)
 
 
-def installation_section(service, dokku_version):
+def installation_section(service, dokku_version, maintainer):
     return "\n".join(
         [
             "## Installation",
             "",
             "```shell",
             f"# on {dokku_version}",
-            f"sudo dokku plugin:install https://github.com/dokku/dokku-{service}.git --name {service}",
+            f"sudo dokku plugin:install https://github.com/{maintainer}/dokku-{service}.git --name {service}",
             "```",
         ]
     )
 
 
-def commands_section(service, variable, alias, image, scheme, ports, unimplemented):
+def commands_section(service, variable, alias, unimplemented):
     content = [
         "## Commands",
         "",
@@ -131,7 +127,7 @@ def commands_section(service, variable, alias, image, scheme, ports, unimplement
     for filename in subcommands:
         if filename in unimplemented:
             continue
-        data = command_data(filename, service, variable, alias, image, scheme, ports)
+        data = command_data(filename, service, variable, alias)
         description = data["description"]
         arguments = data["arguments_string"]
 
@@ -149,191 +145,28 @@ def commands_section(service, variable, alias, image, scheme, ports, unimplement
     return "\n".join(content)
 
 
-def usage_section(
-    service, variable, alias, image, scheme, ports, options, unimplemented
-):
+def usage_section(service, variable, alias, options, unimplemented):
     return "\n\n".join(
         [
             "## Usage",
             f"Help for any commands can be displayed by specifying the command as an argument to {service}:help. Plugin help output in conjunction with any files in the `docs/` folder is used to generate the plugin documentation. Please consult the `{service}:help` command for any undocumented commands.",
-            usage_intro(
-                service, variable, alias, image, scheme, ports, options, unimplemented
-            ),
-            usage_lifecycle(
-                service, variable, alias, image, scheme, ports, options, unimplemented
-            ),
-            usage_automation(
-                service, variable, alias, image, scheme, ports, options, unimplemented
-            ),
-            usage_data_management(
-                service, variable, alias, image, scheme, ports, options, unimplemented
-            ),
-            usage_backup(
-                service, variable, alias, image, scheme, ports, options, unimplemented
-            ),
-            usage_docker_pull(
-                service, variable, alias, image, scheme, ports, options, unimplemented
-            ),
+            usage_intro(service, variable, alias, options, unimplemented),
         ]
     )
 
 
-def usage_intro(service, variable, alias, image, scheme, ports, options, unimplemented):
-    commands = ["create", "info", "list", "logs", "link", "unlink", "set"]
+def usage_intro(service, variable, alias, options, unimplemented):
+    commands = ["create", "delete", "shared", "show", "status"]
     content = ["### Basic Usage"]
 
     return fetch_commands_content(
         service,
         variable,
         alias,
-        image,
-        scheme,
-        ports,
         options,
         unimplemented,
         commands,
         content,
-    )
-
-
-def usage_lifecycle(
-    service, variable, alias, image, scheme, ports, options, unimplemented
-):
-    commands = [
-        "connect",
-        "enter",
-        "expose",
-        "unexpose",
-        "promote",
-        "start",
-        "stop",
-        "pause",
-        "restart",
-        "upgrade",
-    ]
-    content = [
-        "### Service Lifecycle",
-        "",
-        "The lifecycle of each service can be managed through the following commands:",
-        "",
-    ]
-
-    return fetch_commands_content(
-        service,
-        variable,
-        alias,
-        image,
-        scheme,
-        ports,
-        options,
-        unimplemented,
-        commands,
-        content,
-    )
-
-
-def usage_automation(
-    service, variable, alias, image, scheme, ports, options, unimplemented
-):
-    commands = ["app-links", "clone", "exists", "linked", "links"]
-    content = [
-        "### Service Automation",
-        "",
-        "Service scripting can be executed using the following commands:",
-        "",
-    ]
-
-    return fetch_commands_content(
-        service,
-        variable,
-        alias,
-        image,
-        scheme,
-        ports,
-        options,
-        unimplemented,
-        commands,
-        content,
-    )
-
-
-def usage_data_management(
-    service, variable, alias, image, scheme, ports, options, unimplemented
-):
-    commands = ["import", "export"]
-    content = [
-        "### Data Management",
-        "",
-        "The underlying service data can be imported and exported with the following commands:",
-        "",
-    ]
-
-    return fetch_commands_content(
-        service,
-        variable,
-        alias,
-        image,
-        scheme,
-        ports,
-        options,
-        unimplemented,
-        commands,
-        content,
-    )
-
-
-def usage_backup(
-    service, variable, alias, image, scheme, ports, options, unimplemented
-):
-    commands = [
-        "backup-auth",
-        "backup-deauth",
-        "backup",
-        "backup-set-encryption",
-        "backup-set-public-key-encryption",
-        "backup-unset-encryption",
-        "backup-unset-public-key-encryption",
-        "backup-schedule",
-        "backup-schedule-cat",
-        "backup-unschedule",
-    ]
-    content = [
-        "### Backups",
-        "",
-        "Datastore backups are supported via AWS S3 and S3 compatible services like [minio](https://github.com/minio/minio).",
-        "",
-        "You may skip the `backup-auth` step if your dokku install is running within EC2 and has access to the bucket via an IAM profile. In that case, use the `--use-iam` option with the `backup` command.",
-        "",
-        "Backups can be performed using the backup commands:",
-        "",
-    ]
-
-    return fetch_commands_content(
-        service,
-        variable,
-        alias,
-        image,
-        scheme,
-        ports,
-        options,
-        unimplemented,
-        commands,
-        content,
-    )
-
-
-def usage_docker_pull(
-    service, variable, alias, image, scheme, ports, options, unimplemented
-):
-    service_prefix = service.upper()
-    return "\n".join(
-        [
-            "### Disabling `docker image pull` calls",
-            "",
-            f"If you wish to disable the `docker image pull` calls that the plugin triggers, you may set the `{service_prefix}_DISABLE_PULL` environment variable to `true`. Once disabled, you will need to pull the service image you wish to deploy as shown in the `stderr` output.",
-            "",
-            "Please ensure the proper images are in place when `docker image pull` is disabled.",
-        ]
     )
 
 
@@ -341,9 +174,6 @@ def fetch_commands_content(
     service,
     variable,
     alias,
-    image,
-    scheme,
-    ports,
     options,
     unimplemented,
     commands,
@@ -356,9 +186,6 @@ def fetch_commands_content(
             service,
             variable,
             alias,
-            image,
-            scheme,
-            ports,
             options,
             unimplemented,
         )
@@ -399,13 +226,11 @@ def parse_args(line):
     return " ".join(arguments)
 
 
-def command_help(
-    command, service, variable, alias, image, scheme, ports, options, unimplemented
-):
+def command_help(command, service, variable, alias, options, unimplemented):
     if command in unimplemented:
         return ""
 
-    data = command_data(command, service, variable, alias, image, scheme, ports)
+    data = command_data(command, service, variable, alias)
     content = [
         f"### {data['description']}",
         "",
@@ -444,7 +269,7 @@ def command_help(
     return "\n" + "\n".join(content)
 
 
-def command_data(command, service, variable, alias, image, scheme, ports):
+def command_data(command, service, variable, alias):
     description = None
     arguments = []
     arguments_string = ""
@@ -456,12 +281,6 @@ def command_data(command, service, variable, alias, image, scheme, ports):
             line = line.replace("$PLUGIN_SERVICE", service)
             line = line.replace("$PLUGIN_COMMAND_PREFIX", service)
             line = line.replace("${PLUGIN_COMMAND_PREFIX}", service)
-            line = line.replace("${PLUGIN_VARIABLE}", variable)
-            line = line.replace("${PLUGIN_DEFAULT_ALIAS}", alias)
-            line = line.replace("${PLUGIN_IMAGE}", image)
-            line = line.replace("${PLUGIN_SCHEME}", scheme)
-            line = line.replace("${PLUGIN_DATASTORE_PORTS[0]}", ports[0])
-            line = line.replace("${PLUGIN_DATASTORE_PORTS[@]}", " ".join(ports))
 
             if "declare desc" in line:
                 description = re.search('"(.+)"', line).group(1)
@@ -606,34 +425,28 @@ def process_codeblock(codeblock_lines):
     return f"```\n{codeblock_lines}\n```"
 
 
+def errata_section():
+    content = []
+    if os.path.isfile("docs/errata.md"):
+        with open("docs/errata.md") as f:
+            content.append(f.read())
+
+    return "\n".join(content)
+
+
 def main():
     service = None
-    version = None
     variable = None
-    image = None
     alias = None
     options = None
     unimplemented = []
-
-    with open("Dockerfile") as f:
-        for line in f.readlines():
-            if "FROM " in line:
-                image, version = line.split(" ")[1].split(":")
-                image = image.strip()
-                version = version.strip()
+    description = None
+    maintainer = "dokku"
 
     with open("config") as f:
         for line in f.readlines():
             if "PLUGIN_COMMAND_PREFIX=" in line:
                 service = re.search('"(.+)"', line).group(1)
-            if "PLUGIN_DEFAULT_ALIAS=" in line:
-                alias = re.search('"(.+)"', line).group(1)
-            if "PLUGIN_VARIABLE=" in line:
-                variable = re.search('"(.+)"', line).group(1)
-            if "PLUGIN_SCHEME=" in line:
-                scheme = re.search('"(.+)"', line).group(1)
-            if "PLUGIN_DATASTORE_PORTS=" in line:
-                ports = re.search("\((.+)\)", line).group(1).split(" ")
             if "PLUGIN_UNIMPLEMENTED_SUBCOMMANDS=" in line:
                 match = re.search("\((.+)\)", line)
                 if match is not None:
@@ -649,18 +462,20 @@ def main():
     sponsors = []
     with open("plugin.toml") as f:
         for line in f.readlines():
+            if line.startswith("description"):
+                description = re.search('"(.+)"', line).group(1)
+            if line.startswith("maintainer"):
+                maintainer = re.search('"(.+)"', line).group(1)
             if line.startswith("sponsors"):
                 sponsors = re.search('\[(["\w\s,_-]+)\]', line).group(1)
                 sponsors = [s.strip('"') for s in sponsors.split(",")]
 
     text = compile(
         service,
-        version,
         variable,
         alias,
-        image,
-        scheme,
-        ports,
+        description,
+        maintainer,
         sponsors,
         options,
         unimplemented,
