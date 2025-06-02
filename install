@@ -2,18 +2,25 @@
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
 
-SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
+trigger-deployment-keys-install() {
+  declare desc="installs the deployment keys"
+  declare trigger="install"
 
-if [[ ! -d "$SHARED_KEY_FOLDER" ]]; then
-  mkdir -p "$SHARED_KEY_FOLDER"
-fi
+  SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
 
-if [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
-  ssh-keygen -q -t rsa -b 2048 -f "$SHARED_KEY_FOLDER/id_rsa" -N ""
-fi
+  if [[ ! -d "$SHARED_KEY_FOLDER" ]]; then
+    mkdir -p "$SHARED_KEY_FOLDER"
+  fi
 
-chmod 700 "$SHARED_KEY_FOLDER"
-chmod 600 "$SHARED_KEY_FOLDER/id_rsa"
-chmod 600 "$SHARED_KEY_FOLDER/id_rsa.pub"
-#find "$SHARED_KEY_FOLDER" | xargs -0 chown -R dokku:dokku
-chown -R dokku:dokku "$DOKKU_ROOT/.deployment-keys"
+  if [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
+    ssh-keygen -q -t rsa -b 2048 -f "$SHARED_KEY_FOLDER/id_rsa" -N ""
+  fi
+
+  chmod 700 "$SHARED_KEY_FOLDER"
+  chmod 600 "$SHARED_KEY_FOLDER/id_rsa"
+  chmod 600 "$SHARED_KEY_FOLDER/id_rsa.pub"
+  #find "$SHARED_KEY_FOLDER" | xargs -0 chown -R dokku:dokku
+  chown -R dokku:dokku "$DOKKU_ROOT/.deployment-keys"
+}
+
+trigger-deployment-keys-install "$@"

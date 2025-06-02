@@ -3,7 +3,9 @@ set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_ENABLED_PATH/common/functions"
 
-main() {
+trigger-deployment-keys-pre-build() {
+  declare desc="adds the deployment keys to the build environment"
+  declare trigger="pre-build"
   declare BUILDER_TYPE="$1" APP="$2"
   if [[ "$BUILDER_TYPE" != "herokuish" ]]; then
     return
@@ -101,4 +103,4 @@ main() {
   "$DOCKER_BIN" container commit "$CID" "$IMAGE" >/dev/null
 }
 
-main "$@"
+trigger-deployment-keys-pre-build "$@"

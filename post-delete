@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+
+trigger-deployment-keys-post-delete() {
+  declare desc="destroys the deployment keys for a given app"
+  declare trigger="post-delete"
+  declare APP="$1"
+
+  local app_specific_key_folder="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
+  rm -rf "$app_specific_key_folder"
+}
+
+trigger-deployment-keys-post-delete "$@"
