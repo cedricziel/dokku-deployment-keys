@@ -1,4 +1,4 @@
-# dokku deployment-keys [![Build Status](https://img.shields.io/github/actions/workflow/status/cedricziel/dokku-deployment-keys/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/cedricziel/dokku-deployment-keys/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
+# dokku deployment-keys [![Build Status](https://img.shields.io/github/actions/workflow/status/cedricziel/dokku-deployment-keys/ci.yaml?branch=master&style=flat-square "Build Status")](https://github.com/cedricziel/dokku-deployment-keys/actions/workflows/ci.yaml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
 Manage SSH deployment keys that should get injected into your containers on-build
 
