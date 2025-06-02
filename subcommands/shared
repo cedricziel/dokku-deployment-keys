@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/config"
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
+
+shared-cmd() {
+  #E shows the current shared public key
+  #E dokku $PLUGIN_COMMAND_PREFIX:shared
+  declare desc="shows the current shared public key"
+  local cmd="$PLUGIN_COMMAND_PREFIX:shared" argv=("$@")
+  [[ ${argv[0]} == "$cmd" ]] && shift 1
+
+  dokku_log_info1_quiet "This is the current shared public key:"
+  local shared_key_folder="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
+  cat "$shared_key_folder/id_rsa.pub"
+}
+
+shared-cmd "$@"

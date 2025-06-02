@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export DOKKU_LIB_HOST_ROOT=${DOKKU_LIB_HOST_ROOT:=$DOKKU_LIB_ROOT}
+
+export PLUGIN_COMMAND_PREFIX="deployment-keys"
+export PLUGIN_CONFIG_ROOT=${PLUGIN_CONFIG_ROOT:="$DOKKU_LIB_ROOT/config/$PLUGIN_COMMAND_PREFIX"}
+export PLUGIN_SERVICE="Deployment Keys"
+export PLUGIN_BASE_PATH="$PLUGIN_PATH"
+export PLUGIN_CONFIG_SUFFIX="config"
+if [[ -n $DOKKU_API_VERSION ]]; then
+  export PLUGIN_BASE_PATH="$PLUGIN_ENABLED_PATH"
+fi
