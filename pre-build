@@ -1,48 +1,104 @@
 #!/usr/bin/env bash
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_ENABLED_PATH/common/functions"
-BUILDER_TYPE="$1" APP="$2"
-if [[ "$BUILDER_TYPE" != "herokuish" ]]; then
-  exit 0
-fi
-IMAGE=$(get_app_image_name $APP)
 
-APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
-SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
-
-bash $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/install
-[[ ! -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" ]] && [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]] && return
-
-if [[ -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" ]]; then
-  FINAL_SSH_FOLDER="$APP_SPECIFIC_KEY_FOLDER"
-  KEYTYPE="app specific"
-else
-  if [[ -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
-    FINAL_SSH_FOLDER="$SHARED_KEY_FOLDER"
-    KEYTYPE="shared"
+main() {
+  declare BUILDER_TYPE="$1" APP="$2"
+  if [[ "$BUILDER_TYPE" != "herokuish" ]]; then
+    return
   fi
-fi
 
-dokku_log_info1 "Adding $KEYTYPE deployment-keys to build environment ..."
+  IMAGE=$(get_app_image_name "$APP")
 
-# 1. Create the .ssh folder
-id=$(docker run $DOKKU_GLOBAL_RUN_ARGS -d $IMAGE /bin/bash -c "mkdir -p /app/.ssh")
-test $(docker wait $id) -eq 0
-docker commit $id $IMAGE > /dev/null
+  APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
+  SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
 
-# 2. Transfer the app specific private key to the container
-# shellcheck disable=SC2002
-idWithKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa && chmod 600 /app/.ssh/id_rsa")
-test $(docker wait $idWithKeys) -eq 0
-docker commit $idWithKeys $IMAGE > /dev/null
+  bash "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install"
+  [[ ! -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" ]] && [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]] && return
 
-# 3. Transfer the app specific public key to the container
-# shellcheck disable=SC2002
-idWithPublicKeys=$(cat "$FINAL_SSH_FOLDER/id_rsa.pub" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa.pub && chmod 600 /app/.ssh/id_rsa && chmod 644 /app/.ssh/id_rsa.pub && chown -R 1001:1001 /app/.ssh")
-test $(docker wait $idWithPublicKeys) -eq 0
-docker commit $idWithPublicKeys $IMAGE > /dev/null
+  if [[ -f "$APP_SPECIFIC_KEY_FOLDER/id_rsa" ]]; then
+    FINAL_SSH_FOLDER="$APP_SPECIFIC_KEY_FOLDER"
+    KEYTYPE="app specific"
+  else
+    if [[ -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
+      FINAL_SSH_FOLDER="$SHARED_KEY_FOLDER"
+      KEYTYPE="shared"
+    fi
+  fi
 
-# 4. Add identity file option to global SSH config
-idWithConfig=$(echo "IdentityFile /app/.ssh/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config" )
-test $(docker wait $idWithConfig) -eq 0
-docker commit $idWithConfig $IMAGE > /dev/null
+  dokku_log_info1 "Adding $KEYTYPE deployment-keys to build environment ..."
+
+  TMP_WORK_DIR=$(mktemp -d "/tmp/dokku-${DOKKU_PID}-${FUNCNAME[0]}.XXXXXX")
+  CID_FILE="$(mktemp -u "/tmp/dokku-${DOKKU_PID}-${FUNCNAME[0]}.XXXXXX")"
+  # shellcheck disable=SC2064
+  trap "rm -rf '$TMP_WORK_DIR' '$CID_FILE' >/dev/null" RETURN
+
+  # 1. Create the .ssh folder
+  "$DOCKER_BIN" container run $DOKKU_GLOBAL_RUN_ARGS -d --cidfile="$CID_FILE" "$IMAGE" /bin/bash -c "mkdir -p /app/.ssh"
+  CID="$(cat "$CID_FILE")"
+  rm -f "$CID_FILE"
+  if [[ -z "$CID" ]]; then
+    dokku_log_warn "Failure creating initial .ssh folder image"
+    return 1
+  fi
+
+  if test "$("$DOCKER_BIN" container wait "$CID")" -ne 0; then
+    dokku_log_warn "Failure creating .ssh folder"
+    return 1
+  fi
+
+  "$DOCKER_BIN" container commit "$CID" "$IMAGE" >/dev/null
+
+  # 2. Transfer the app specific private key to the container
+  # shellcheck disable=SC2002
+  cat "$FINAL_SSH_FOLDER/id_rsa" | "$DOCKER_BIN" container run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin "$IMAGE" /bin/bash -c "cat >> /app/.ssh/id_rsa && chmod 600 /app/.ssh/id_rsa"
+  CID="$(cat "$CID_FILE")"
+  rm -f "$CID_FILE"
+  if [[ -z "$CID" ]]; then
+    dokku_log_warn "Failure creating app specific private key image"
+    return 1
+  fi
+
+  if test "$("$DOCKER_BIN" container wait "$CID")" -ne 0; then
+    dokku_log_warn "Failure transferring app specific private key"
+    return 1
+  fi
+
+  "$DOCKER_BIN" container commit "$CID" "$IMAGE" >/dev/null
+
+  # 3. Transfer the app specific public key to the container
+  # shellcheck disable=SC2002
+  cat "$FINAL_SSH_FOLDER/id_rsa.pub" | "$DOCKER_BIN" container run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa.pub && chmod 600 /app/.ssh/id_rsa && chmod 644 /app/.ssh/id_rsa.pub && chown -R 1001:1001 /app/.ssh"
+  CID="$(cat "$CID_FILE")"
+  rm -f "$CID_FILE"
+  if [[ -z "$CID" ]]; then
+    dokku_log_warn "Failure creating app specific public key image"
+    return 1
+  fi
+
+  if test "$("$DOCKER_BIN" container wait "$CID")" -ne 0; then
+    dokku_log_warn "Failure transferring app specific public key"
+    return 1
+  fi
+
+  "$DOCKER_BIN" container commit "$CID" "$IMAGE" >/dev/null
+
+  # 4. Add identity file option to global SSH config
+  echo "IdentityFile /app/.ssh/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config"
+  CID="$(cat "$CID_FILE")"
+  rm -f "$CID_FILE"
+  if [[ -z "$CID" ]]; then
+    dokku_log_warn "Failure creating global SSH config image"
+    return 1
+  fi
+
+  if test "$("$DOCKER_BIN" container wait "$CID")" -ne 0; then
+    dokku_log_warn "Failure transferring global SSH config"
+    return 1
+  fi
+
+  "$DOCKER_BIN" container commit "$CID" "$IMAGE" >/dev/null
+}
+
+main "$@"
