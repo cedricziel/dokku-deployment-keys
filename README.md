@@ -23,7 +23,7 @@ sudo dokku plugin:install https://github.com/cedricziel/dokku-deployment-keys.gi
 ```
 deployment-keys:create <app> # create a pair of app-specific deployment keys
 deployment-keys:delete <app> # delete the current pair of deployment keys
-deployment-keys:shared <app> # shows the current shared public key
+deployment-keys:shared       # shows the current shared public key
 deployment-keys:show <app>   # shows the current public key to add to your VCS
 deployment-keys:status <app> # shows the current status of the deployment keys for an app
 ```
@@ -64,13 +64,13 @@ dokku deployment-keys:delete my-app
 
 ```shell
 # usage
-dokku deployment-keys:shared <app>
+dokku deployment-keys:shared
 ```
 
 Shows the current shared public key:
 
 ```shell
-dokku deployment-keys:shared my-app
+dokku deployment-keys:shared
 ```
 
 ### shows the current public key to add to your VCS
