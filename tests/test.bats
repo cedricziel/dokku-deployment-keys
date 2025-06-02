@@ -34,7 +34,7 @@ teardown() {
   assert_success
   assert_output_contains "Keys created"
 
-  run ls -lah "$DOKKU_ROOT/.deployment-keys/my-app/.ssh"
+  run ls -lah "/home/dokku/.deployment-keys/my-app/.ssh"
   echo "output: $output"
   echo "status: $status"
   assert_success
