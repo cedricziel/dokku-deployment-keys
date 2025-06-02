@@ -10,8 +10,8 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:create) creates a new deployment key" {
-  dokku "$PLUGIN_COMMAND_PREFIX:create" my-app
+  run dokku "$PLUGIN_COMMAND_PREFIX:create" my-app
   assert_output_contains "Keys created"
   assert_output_contains "ssh-rsa"
-  assert_output_contains "They will be baked into the container on next push/rebuild"
+  assert_output_contains "The key will be baked into the container on next push/rebuild"
 }
