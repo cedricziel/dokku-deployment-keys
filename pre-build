@@ -74,7 +74,7 @@ trigger-deployment-keys-pre-build() {
   # 3. Transfer the public key to the container
   dokku_log_verbose_quiet "Transferring $KEYTYPE public key to container"
   # shellcheck disable=SC2002
-  cat "$FINAL_SSH_FOLDER/id_rsa.pub" | "$DOCKER_BIN" container run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin $IMAGE /bin/bash -c "cat >> /app/.ssh/id_rsa.pub && chmod 600 /app/.ssh/id_rsa && chmod 644 /app/.ssh/id_rsa.pub && chown -R 1001:1001 /app/.ssh"
+  cat "$FINAL_SSH_FOLDER/id_rsa.pub" | "$DOCKER_BIN" container run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin "$IMAGE" /bin/bash -c "cat >> /app/.ssh/id_rsa.pub && chmod 600 /app/.ssh/id_rsa && chmod 644 /app/.ssh/id_rsa.pub && chown -R 1001:1001 /app/.ssh"
   CID="$(cat "$CID_FILE")"
   rm -f "$CID_FILE"
   if [[ -z "$CID" ]]; then
@@ -91,7 +91,7 @@ trigger-deployment-keys-pre-build() {
 
   # 4. Add identity file option to global SSH config
   dokku_log_verbose_quiet "Adding identity file option to global SSH config"
-  echo "IdentityFile /app/.ssh/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin $IMAGE /bin/bash -c "cat >> /etc/ssh/ssh_config"
+  echo "IdentityFile /app/.ssh/id_rsa" | docker run $DOKKU_GLOBAL_RUN_ARGS --cidfile="$CID_FILE" -i -a stdin "$IMAGE" /bin/bash -c "cat >> /etc/ssh/ssh_config"
   CID="$(cat "$CID_FILE")"
   rm -f "$CID_FILE"
   if [[ -z "$CID" ]]; then
