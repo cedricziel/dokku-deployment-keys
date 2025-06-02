@@ -38,7 +38,7 @@ teardown() {
   echo "output: $output"
   echo "status: $status"
   assert_success
-  assert_output_contains "id_rsa"
+  assert_output_contains "id_rsa" 2
   assert_output_contains "id_rsa.pub"
 
   run dokku "$PLUGIN_COMMAND_PREFIX:delete" my-app
