@@ -22,7 +22,7 @@ teardown() {
   assert_success
   assert_output_contains "Keys created"
 
-  run ls -la "$DOKKU_ROOT/.deployment-keys/my-app/.ssh"
+  run ls -lah "$DOKKU_ROOT/.deployment-keys/my-app/.ssh"
   assert_success
   assert_output_contains "id_rsa"
   assert_output_contains "id_rsa.pub"
@@ -33,7 +33,7 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:shared) shows the shared key" {
-  run dokku "$PLUGIN_COMMAND_PREFIX:shared"
+  run dokku --trace "$PLUGIN_COMMAND_PREFIX:shared"
   assert_success
   assert_output_contains "ssh-rsa"
 }
