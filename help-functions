@@ -43,13 +43,11 @@ fn-help-all() {
 
     echo -e "${BOLD}usage${NORMAL}: dokku ${PLUGIN_COMMAND_PREFIX}[:COMMAND]"
     echo ''
-    echo -e "${BOLD}List your $PLUGIN_COMMAND_PREFIX services.${NORMAL}"
+    echo -e "${BOLD}Manage deployment keys for an app.${NORMAL}"
     echo ''
     echo -e "${BLUE}Example:${NORMAL}"
     echo ''
-    echo "    \$ dokku $PLUGIN_COMMAND_PREFIX:list"
-    echo ''
-    fn-help-list-example | column -c5 -t -s,
+    echo "    \$ dokku $PLUGIN_COMMAND_PREFIX:shared"
     echo ''
     echo -e "dokku ${BOLD}${PLUGIN_COMMAND_PREFIX}${NORMAL} commands: (get help with ${CYAN}dokku ${PLUGIN_COMMAND_PREFIX}:help SUBCOMMAND${NORMAL})"
     echo ''

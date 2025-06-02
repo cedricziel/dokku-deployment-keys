@@ -49,7 +49,7 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:shared) shows the shared key" {
-  run dokku --trace "$PLUGIN_COMMAND_PREFIX:shared" my-app
+  run dokku "$PLUGIN_COMMAND_PREFIX:shared"
   echo "output: $output"
   echo "status: $status"
   assert_success
