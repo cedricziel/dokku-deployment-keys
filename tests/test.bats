@@ -9,6 +9,14 @@ teardown() {
   dokku --force apps:destroy my-app || true
 }
 
+@test "($PLUGIN_COMMAND_PREFIX:help) displays help" {
+  run dokku "$PLUGIN_COMMAND_PREFIX:help"
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+  assert_output_contains "Manage deployment keys for an app"
+}
+
 @test "($PLUGIN_COMMAND_PREFIX:create) creates a new deployment key" {
   run dokku "$PLUGIN_COMMAND_PREFIX:create" my-app
   echo "output: $output"
