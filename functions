@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
+
+APP="$2"
+APP_SPECIFIC_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
+SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
+
+check_exists() {
+  if [[ ! -d "$DOKKU_ROOT/$APP" ]]; then
+    echo "App must exist before you can operate on private deployment keys for it"
+    exit 1
+  fi
+}
+
+check_app() {
+  if [[ -z "$APP" ]]; then
+    echo "You must specify an app name"
+    exit 1
+  fi
+}
+
+check_app_has_keys() {
+  declare APP="$1"
+  local app_specific_key_folder="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
+
+  if [[ -f "$app_specific_key_folder/id_rsa.pub" ]]; then
+    echo "This app already has a pair of keys. Delete them first to create new ones"
+    exit 1
+  fi
+}
+
+create_private_key_folder() {
+  declare APP="$1"
+  local app_specific_key_folder="$DOKKU_ROOT/.deployment-keys/$APP/.ssh"
+
+  if [[ ! -d "$app_specific_key_folder" ]]; then
+    mkdir -p "$app_specific_key_folder"
+    chown -R dokku:dokku "$DOKKU_ROOT/.deployment-keys/$APP"
+  fi
+}
+
+print_help() {
+  cat <<EOF
+  deploymentkeys:create <app>, Create a pair of app-specific deployment keys
+  deploymentkeys:delete <app>, Delete the current pair of deployment keys
+  deploymentkeys:shared, Shows the current shared public key
+  deploymentkeys:show   <app>, Shows the current public key to add to your VCS
+EOF
+  return
+}
