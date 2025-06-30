@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
 
 trigger-deployment-keys-install() {
   declare desc="installs the deployment keys"
   declare trigger="install"
 
   SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
-
-  if [[ ! -d "$SHARED_KEY_FOLDER" ]]; then
-    mkdir -p "$SHARED_KEY_FOLDER"
-  fi
+  mkdir -p "$SHARED_HOSTKEYS_FOLDER"
+  mkdir -p "$PLUGIN_CONFIG_ROOT"
 
   if [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
     ssh-keygen -q -t rsa -b 2048 -f "$SHARED_KEY_FOLDER/id_rsa" -N ""
