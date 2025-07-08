@@ -8,7 +8,7 @@ trigger-deployment-keys-install() {
   declare trigger="install"
 
   SHARED_KEY_FOLDER="$DOKKU_ROOT/.deployment-keys/shared/.ssh"
-  mkdir -p "$SHARED_HOSTKEYS_FOLDER"
+  mkdir -p "$SHARED_KEY_FOLDER"
   mkdir -p "$PLUGIN_CONFIG_ROOT"
 
   if [[ ! -f "$SHARED_KEY_FOLDER/id_rsa" ]]; then
