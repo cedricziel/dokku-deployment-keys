@@ -1,0 +1,27 @@
+{
+  "extraKnownMarketplaces": {
+    "cedricziel": {
+      "source": {
+        "source": "github",
+        "repo": "cedricziel/claude-plugins",
+        "ref": "main",
+        "sha": "33cbfab3741e182c8e540fe193affdb45978e927"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "oss@cedricziel": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/install-claude-plugins.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
